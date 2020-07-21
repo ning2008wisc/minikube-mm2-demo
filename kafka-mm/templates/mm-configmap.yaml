@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "kafka-mm.fullname" . }}-configmap
+  labels:
+    app: {{ template "kafka-mm.name" . }}
+    chart: {{ template "kafka-mm.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  mirror-maker.properties: |+
+    {{- range $key, $value := .Values.kafka.mmConfig }}
+    {{ $key }}={{ $value }}
+    {{- end }}
