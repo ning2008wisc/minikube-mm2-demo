@@ -1,0 +1,18 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: zookeeper-service-backup
+  name: zookeeper-service-backup
+  namespace: kafka
+spec:
+  type: NodePort
+  ports:
+  - name: zookeeper-port
+    port: 2181
+    # nodePort: 30181
+    targetPort: 2181
+  selector:
+    app: zookeeper-backup
+

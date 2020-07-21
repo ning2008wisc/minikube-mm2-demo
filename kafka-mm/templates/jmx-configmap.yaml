@@ -1,0 +1,53 @@
+{{- if and .Values.jmx.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "kafka-mm.fullname" . }}-jmx-configmap
+  labels:
+    app: {{ template "kafka-mm.name" . }}
+    chart: {{ template "kafka-mm.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  jmx-kafka-mm-prometheus.yml: |+
+    jmxUrl: service:jmx:rmi:///jndi/rmi://localhost:{{ .Values.jmx.port }}/jmxrmi
+    whitelistObjectNames:
+    - kafka.connect.mirror:*
+    - java.lang:*
+    lowercaseOutputName: true
+    lowercaseOutputLabelNames: true
+    ssl: false
+    rules:
+    - pattern: kafka.connect.mirror<type=(MirrorSourceConnector), target=([-.\w]+), topic=([-.\w]+), partition=([0-9]+)><>([-.\w]+)
+      name: kafka_connect_mirror_$1_$5
+      labels:
+        target: $2
+        topic: $3
+        partition: $4
+      type: GAUGE
+    
+    # java.lang<type=GarbageCollector, name=G1 Old Generation><>CollectionCount
+    - pattern: java.lang<type=(GarbageCollector), name=(G1 Old Generation)><>CollectionCount
+      name: java_lang_$1_$2_collections_total
+      type: COUNTER
+      help: "G1 Old Generation garbage collections since broker start."
+
+    # java.lang<type=GarbageCollector, name=G1 Young Generation><>CollectionCount
+    - pattern: java.lang<type=(GarbageCollector), name=(G1 Young Generation)><>CollectionCount
+      name: java_lang_$1_$2_collections_total
+      type: COUNTER
+      help: "G1 Young Generation garbage collections since broker start."
+
+    # java.lang<type=GarbageCollector, name=G1 Young Generation><LastGcInfo>duration
+    - pattern: java.lang<type=(GarbageCollector), name=(G1 Young Generation)><LastGcInfo>duration
+      name: java_lang_$1_$2_last_gc_duration_millis
+      type: GAUGE
+      help: "Duration of last G1 Young Generation GC in milliseconds." 
+    - pattern: 'java.lang<type=Memory><HeapMemoryUsage>(.+): .*'
+    - pattern: 'java.lang<type=Memory><NonHeapMemoryUsage>(.+): .*'
+    - pattern: 'java.lang<type=OperatingSystem><.*>OpenFileDescriptorCount: .*'
+    - pattern: 'java.lang<type=OperatingSystem><.*>ProcessCpuLoad: .*'
+    - pattern: 'java.lang<type=Threading><(.*)>ThreadCount: .*'
+    - pattern: 'java.lang<type=Runtime><(.*)>Uptime: .*'
+
+{{- end }}

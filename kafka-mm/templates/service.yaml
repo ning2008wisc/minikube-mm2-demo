@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "kafka-mm.fullname" . }}
+  namespace: kafka
+  labels:
+    app: {{ template "kafka-mm.name" . }}
+    chart: {{ template "kafka-mm.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  ports:
+    - name: kafka-mm
+      port: {{ .Values.servicePort }}
+  selector:
+    app: {{ template "kafka-mm.name" . }}
+    release: {{ .Release.Name }}

@@ -1,0 +1,82 @@
+# Default values for kafka-mm.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image: ning2008wisc/kafka-mm-trunk
+imageTag: latest
+
+
+## Specify a imagePullPolicy
+## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+imagePullPolicy: Always
+
+servicePort: 8083
+
+## Kafka MirrorMaker JVM Heap Option
+heapOptions: "-Xms500M -Xmx500M"
+
+## Additional env variables
+customEnv: {}
+
+resources:
+  limits:
+   cpu: 500m
+   memory: 1Gi
+  requests:
+   cpu: 500m
+   memory: 1Gi
+
+## Custom pod annotations
+podAnnotations: {}
+
+## Node labels for pod assignment
+## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+nodeSelector: {}
+
+## Taints to tolerate on node assignment:
+## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+tolerations: {}
+
+## Monitoring
+## Kafka MirrorMaker JMX Settings
+## ref: https://kafka.apache.org/documentation/#monitoring
+jmx:
+  port: 9998
+  enabled: true
+
+## Prometheus Exporter Configuration
+## ref: https://prometheus.io/docs/instrumenting/exporters/
+prometheus:
+  ## JMX Exporter Configuration
+  ## ref: https://github.com/prometheus/jmx_exporter
+  jmx:
+    image: solsson/kafka-prometheus-jmx-exporter@sha256
+    imageTag: 6f82e2b0464f50da8104acd7363fb9b995001ddff77d248379f8788e78946143
+    port: 8081
+
+    ## Resources configuration for the JMX exporter container.
+    ## See the `resources` documentation above for details.
+    resources: {}
+
+## You can list load balanced service endpoint, or list of all brokers (which is hard in K8s).  e.g.:
+## bootstrapServers: "PLAINTEXT://prod-kafka-0:9092"
+kafka:
+  mmConfig:
+    clusters: primary, backup
+    backup.bootstrap.servers: kafka2:9092
+    primary.bootstrap.servers: kafka:9092
+    primary->backup.enabled: true
+    backup->primary.enabled: false # set to false if one-way replication is desired
+    primary->backup.topics: test
+    ## primary->backup.topics.blacklist: topics_to_blacklist
+    tasks.max: 2 ## Kafka Connect level config, refer to Kafka Connect doc
+    ## below is producer-level config that affects the producing bebaviors in MM
+    backup.producer.buffer.memory: 32768
+    backup.offset.flush.timeout.ms: 20000
+    ## backup.ssl.truststore.location: /usr/lib/jvm/zulu-8-amd64/jre/lib/security/cacerts
+    ## backup.security.protocol: SSL
+    ## below is consumer-level config that affects the consuming bebaviors in MM
+    primary.partition.assignment.strategy: org.apache.kafka.clients.consumer.CooperativeStickyAssignor
+    primary.scheduled.rebalance.max.delay.ms: 60000
