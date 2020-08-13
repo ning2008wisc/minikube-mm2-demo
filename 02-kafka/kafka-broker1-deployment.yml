@@ -56,4 +56,5 @@ spec:
           - name: JMX_PORT
             value: "1099"
           - name: KAFKA_CREATE_TOPICS
-            value: "test:3:1"
+            value: "foo:3:3,bar:3:3"
+

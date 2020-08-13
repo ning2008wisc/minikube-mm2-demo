@@ -55,3 +55,5 @@ spec:
             value: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote.rmi.port=1099"
           - name: JMX_PORT
             value: "1099"
+          - name: KAFKA_CREATE_TOPICS
+            value: "primary.foo:3:3,primary.bar:3:3"

@@ -1,0 +1,37 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kafka--test
+  name: kafka-test
+  namespace: kafka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-test
+  template:
+    metadata:
+      labels:
+        app: kafka-test
+    spec:
+      containers:
+      - image: ning2008wisc/kafka-test:0.1
+        imagePullPolicy: IfNotPresent
+        name: kafka-test
+        ports:
+        - containerPort: 8080
+        env:
+        - name: TOPICS
+          value: foo,bar
+        - name: SOURCE_BROKER_LIST
+          value: kafka:9092
+        - name: TARGET_BROKER_LIST
+          value: kafka2:9092
+        - name: NUM_THREAD
+          value: "1"
+        - name: NUM_RECORD
+          value: "10000"
+        - name: SLEEP_TIME_MS
+          value: "0" 
