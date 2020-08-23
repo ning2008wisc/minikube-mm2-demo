@@ -57,3 +57,5 @@ spec:
             value: "1099"
           - name: KAFKA_CREATE_TOPICS
             value: "primary.test:3:3"
+          - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE
+            value: "false"
